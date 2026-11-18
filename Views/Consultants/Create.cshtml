@@ -1,0 +1,23 @@
+@model Consultant
+
+@{
+    ViewData["Title"] = "Add Consultant";
+}
+
+<h1>Add Consultant</h1>
+<p class="text-muted">Enter the consultant's information. All fields are required.</p>
+
+<div class="row">
+    <div class="col-lg-7 col-xl-6">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <partial name="_ConsultantForm" />
+            <button type="submit" class="btn btn-primary">Save Consultant</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

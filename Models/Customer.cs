@@ -15,14 +15,19 @@ namespace BookingManagement.MVC.Models
         [EmailAddress(ErrorMessage = "Please enter a valid email")]
         public string Email { get; set; } = string.Empty;
 
-        [Range(16, 60, ErrorMessage = "Age must be between 16 and 60")]
-        public int Age { get; set; }
-
         [Required(ErrorMessage = "Phone number is required")]
         [Phone(ErrorMessage = "Please enter a valid phone number")]
         public string Phone { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Address is required")]
         public string Address { get; set; } = string.Empty;
+
+        public DateTime AddedAt { get; set; }
+        public int AddedBy { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public int UpdatedBy { get; set; }
+        public bool Status { get; set; } = true;
+
+        public ICollection<AppointmentBooking> Appointments { get; set; } = [];
     }
 }

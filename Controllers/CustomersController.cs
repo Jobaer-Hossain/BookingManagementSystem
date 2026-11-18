@@ -47,7 +47,7 @@ namespace BookingManagement.MVC.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-            [Bind("FullName,Email,Age,Phone,Address")] Customer customer)
+            [Bind("FullName,Email,Phone,Address")] Customer customer)
         {
             Normalize(customer);
             ModelState.Clear();
@@ -62,6 +62,11 @@ namespace BookingManagement.MVC.Controllers
                 ModelState.AddModelError(nameof(Customer.Email), "A customer with this email already exists.");
                 return View(customer);
             }
+
+            var now = DateTime.UtcNow;
+            customer.AddedAt = now;
+            customer.UpdatedAt = now;
+            customer.Status = true;
 
             _context.Customers.Add(customer);
             await _context.SaveChangesAsync();
@@ -86,41 +91,41 @@ namespace BookingManagement.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
             int id,
-            [Bind("Id,FullName,Email,Age,Phone,Address")] Customer customer)
+            [Bind("Id,FullName,Email,Phone,Address")] Customer input)
         {
-            if (id != customer.Id)
+            if (id != input.Id)
             {
                 return NotFound();
             }
 
-            Normalize(customer);
+            Normalize(input);
             ModelState.Clear();
 
-            if (!TryValidateModel(customer))
+            if (!TryValidateModel(input))
             {
-                return View(customer);
+                return View(input);
             }
 
-            if (await EmailExists(customer.Email, customer.Id))
+            if (await EmailExists(input.Email, input.Id))
             {
                 ModelState.AddModelError(nameof(Customer.Email), "A customer with this email already exists.");
-                return View(customer);
+                return View(input);
             }
 
-            try
-            {
-                _context.Customers.Update(customer);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!await CustomerExists(customer.Id))
-                {
-                    return NotFound();
-                }
+            var customer = await _context.Customers.FindAsync(id);
 
-                throw;
+            if (customer is null)
+            {
+                return NotFound();
             }
+
+            customer.FullName = input.FullName;
+            customer.Email = input.Email;
+            customer.Phone = input.Phone;
+            customer.Address = input.Address;
+            customer.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Customer updated successfully.";
             return RedirectToAction(nameof(Index));
@@ -153,16 +158,17 @@ namespace BookingManagement.MVC.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            if (await _context.Appointments.AnyAsync(appointment => appointment.CustomerId == id))
+            {
+                TempData["ErrorMessage"] = "This customer has appointments and cannot be deleted.";
+                return RedirectToAction(nameof(Index));
+            }
+
             _context.Customers.Remove(customer);
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Customer deleted successfully.";
             return RedirectToAction(nameof(Index));
-        }
-
-        private async Task<bool> CustomerExists(int id)
-        {
-            return await _context.Customers.AnyAsync(customer => customer.Id == id);
         }
 
         private async Task<bool> EmailExists(string email, int? excludedCustomerId = null)

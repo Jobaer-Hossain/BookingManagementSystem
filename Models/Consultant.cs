@@ -1,0 +1,37 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace BookingManagement.MVC.Models
+{
+    public class Consultant
+    {
+        public int Id { get; set; }
+
+        [Display(Name = "Full Name")]
+        [Required(ErrorMessage = "Full name is required")]
+        [StringLength(100, ErrorMessage = "Full name cannot exceed 100 characters")]
+        public string Name { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Please enter a valid email")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Phone number is required")]
+        [Phone(ErrorMessage = "Please enter a valid phone number")]
+        public string Phone { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Specialization is required")]
+        [StringLength(100)]
+        public string Specialization { get; set; } = string.Empty;
+
+        public int AppointmentDuration { get; set; }
+
+        public DateTime AddedAt { get; set; }
+        public int AddedBy { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public int UpdatedBy { get; set; }
+        public bool Status { get; set; } = true;
+
+        public ICollection<ConsultantSchedule> WorkingSchedules { get; set; } = [];
+        public ICollection<AppointmentBooking> Appointments { get; set; } = [];
+    }
+}
